@@ -29,13 +29,12 @@ async def _(session: CommandSession):
 async def _(session: NLPSession):
     stripped_msg = session.msg_text.strip()
     words = posseg.lcut(stripped_msg)
-    trash = None
+    trash = ''
 
     for word in words:
-        if word.flag == 'n':
+        if word.flag == 'n' or word.flag == 'nr':
             if not word.word == '垃圾':
-                trash = word.word
-
+                trash += word.word
     return IntentCommand(90.0, 'refuse_classification', current_arg=trash)
 
 
