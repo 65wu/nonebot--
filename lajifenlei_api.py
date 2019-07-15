@@ -1,5 +1,5 @@
 import aiohttp
-from aiocqhttp.message import escape
+from jieba import posseg
 
 
 async def get_the_sort_of_trash(trash: str) -> str:
@@ -30,3 +30,13 @@ async def get_the_sort_of_trash(trash: str) -> str:
     if all_of_trash_list:
         return f'找到了多种相关垃圾，有{all_of_trash},请再次输入，查询您想要的结果'
     return '查询失败，垃圾未找到'
+
+
+def participle(msg: str) -> str:
+    words = posseg.lcut(msg)
+    trash = ''
+    for word in words:
+        if word.flag == 'n' or word.flag == 'nr':
+            if not word.word == '垃圾':
+                trash += word.word
+    return trash

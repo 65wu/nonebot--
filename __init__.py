@@ -1,12 +1,12 @@
 from nonebot import on_command, CommandSession
 from nonebot import on_natural_language, NLPSession, IntentCommand
-from jieba import posseg
-from .lajifenlei_api import get_the_sort_of_trash
+from .lajifenlei_api import get_the_sort_of_trash, participle
 
 
 @on_command('refuse_classification', aliases={'是什么垃圾', '属于什么垃圾'})
 async def refuse_classification(session: CommandSession):
-    trash = session.get('trash')
+    trash = session.get('trash', prompt='你想查询什么垃圾')
+    print("trash:"+trash)
     await session.send("正在查询中，请稍候~")
     trash_result = await get_the_sort_of_trash(trash)
     await session.send(trash_result)
@@ -14,29 +14,20 @@ async def refuse_classification(session: CommandSession):
 
 @refuse_classification.args_parser
 async def _(session: CommandSession):
-    stripped_arg = session.current_arg_text.strip()
-    if session.is_first_run:
-        if stripped_arg:
-            session.state['trash'] = stripped_arg
+    stripped_arg = participle(session.current_arg_text.strip())
+    if stripped_arg:
+        session.state['trash'] = stripped_arg
         return
-
-    if not stripped_arg:
-        session.pause('要查询的垃圾名称不能为空呢，请重新输入')
-    session.state[session.current_key] = stripped_arg
+    else:
+        session.pause('不存在这种垃圾呢，请重新输入')
+        session.state[session.current_key] = stripped_arg
 
 
 @on_natural_language(keywords={'是什么垃圾', '属于什么垃圾'})
 async def _(session: NLPSession):
     stripped_msg = session.msg_text.strip()
-    words = posseg.lcut(stripped_msg)
-    trash = ''
-
-    for word in words:
-        if word.flag == 'n' or word.flag == 'nr':
-            if not word.word == '垃圾':
-                trash += word.word
+    trash = participle(stripped_msg)
     return IntentCommand(90.0, 'refuse_classification', current_arg=trash)
-
 
 
 
