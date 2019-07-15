@@ -6,7 +6,6 @@ from .lajifenlei_api import get_the_sort_of_trash, participle
 @on_command('refuse_classification', aliases={'是什么垃圾', '属于什么垃圾'})
 async def refuse_classification(session: CommandSession):
     trash = session.get('trash', prompt='你想查询什么垃圾')
-    print("trash:"+trash)
     await session.send("正在查询中，请稍候~")
     trash_result = await get_the_sort_of_trash(trash)
     await session.send(trash_result)
@@ -20,7 +19,6 @@ async def _(session: CommandSession):
         return
     else:
         session.pause('不存在这种垃圾呢，请重新输入')
-        session.state[session.current_key] = stripped_arg
 
 
 @on_natural_language(keywords={'是什么垃圾', '属于什么垃圾'})
